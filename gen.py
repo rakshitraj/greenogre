@@ -1,11 +1,21 @@
 import cv2
 import numpy as np
 
-img = cv2.imread('res/cars/Cars3.png')
-kernel = np.ones((5,5), np.uint8)
+# images = []
+# paths = ['res/cars/Cars1.png',
+#          'res/cars/Cars2.png',
+#          'res/cars/Cars3.png',
+#          'res/cars/Cars4.png',
+#          'res/cars/Cars5.png']
+#
+# for path in paths:
+
+img = cv2.imread('res/cars/Cars2.png')
+
+kernel = np.ones((5, 5), np.uint8)
 
 gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-blur = cv2.GaussianBlur(gray,(7,7),0)
+blur = cv2.GaussianBlur(gray, (7, 7), 0)
 imgCanny = cv2.Canny(gray, 150, 200)
 # make edges thicker
 imgDilation = cv2.dilate(imgCanny, kernel, iterations=1)
