@@ -23,20 +23,24 @@ def display_lines(image, lines):
     line_image = np.zeros_like(image)
     if lines is not None: # checking if any lines were detected at all
         for line in lines:
-            print(line)
-
+            #line = line.reshape(4)
+            x1, y1, x2, y2 = line.reshape(4)
+            cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
+            return line_image
 
 # Read the image
 image = cv2.imread('test_image.jpg')
 # Create copy
 cpy_image = np.copy(image)
 # Canny edge detection
-canny = canny(cpy_image)
+canny_img = canny(cpy_image)
 # Region of interest  #
-roi = region_of_interest(canny)
+roi = region_of_interest(canny_img)
 # Finding straight lines in image using Hough Transform
-lines = cv2.HoughLinesP(roi, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5)
+lines = cv2.HoughLinesP(roi, 1, np.pi/360, 100, np.array([]), minLineLength=40, maxLineGap=5)
 line_image = display_lines(cpy_image, lines)
 
-cv2.imshow('Result', roi)
+# overlay lines over original image
+combined_image = cv2.addWeighted(cpy_image,0.8, line_image, 1, 0)
+cv2.imshow('Result', combined_image)
 cv2.waitKey(0)
