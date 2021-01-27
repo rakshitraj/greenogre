@@ -19,6 +19,12 @@ def region_of_interest(image):
     roi = cv2.bitwise_and(image, mask)
     return roi
 
+def display_lines(image, lines):
+    line_image = np.zeros_like(image)
+    if lines is not None: # checking if any lines were detected at all
+        for line in lines:
+            print(line)
+
 
 # Read the image
 image = cv2.imread('test_image.jpg')
@@ -28,6 +34,9 @@ cpy_image = np.copy(image)
 canny = canny(cpy_image)
 # Region of interest  #
 roi = region_of_interest(canny)
+# Finding straight lines in image using Hough Transform
+lines = cv2.HoughLinesP(roi, 2, np.pi/180, 100, np.array([]), minLineLength=40, maxLineGap=5)
+line_image = display_lines(cpy_image, lines)
 
 cv2.imshow('Result', roi)
 cv2.waitKey(0)
