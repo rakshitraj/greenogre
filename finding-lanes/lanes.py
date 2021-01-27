@@ -10,24 +10,24 @@ def canny(image):
 
 def region_of_interest(image):
     height = image.shape[0]
-    triangle = np.array([(200, height), (1100, height), (500, 250)])
+    # Region of interest is a polygon - triangle
+    polygons = np.array([
+        [(200, height), (1100, height), (500, 250)]
+    ])
     mask = np.zeros_like(image)
-    cv2.fillPoly(mask, triangle, 255)
-    return mask
+    cv2.fillPoly(mask, polygons, 255)
+    roi = cv2.bitwise_and(image, mask)
+    return roi
 
 
 # Read the image
 image = cv2.imread('test_image.jpg')
+# Create copy
 cpy_image = np.copy(image)
-# cv2.imshow('image', image)
-
 # Canny edge detection
 canny = canny(cpy_image)
-# cv2.imshow('Edges', canny)
-
 # Region of interest  #
-# ------------------- #
-plt.imshow(canny)
-plt.show()
+roi = region_of_interest(canny)
 
-# cv2.waitKey(0)
+cv2.imshow('Result', roi)
+cv2.waitKey(0)
