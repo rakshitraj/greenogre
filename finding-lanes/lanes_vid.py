@@ -5,6 +5,10 @@ import matplotlib.pyplot as plt
 def make_coordinates(image, line_parameters):
     scale_factor = (1/2) # ideally use 3/5, scales line to 3/5th height of image
     slope, intercept = line_parameters
+    # try:
+    #     slope, intercept = line_parameters
+    # except TypeError:
+    #     slope, intercept = 1, 0
     y1 = image.shape[0]
     y2 = int(y1*scale_factor)
     x1 = int((y1 - intercept)/slope)
@@ -55,23 +59,41 @@ def display_lines(image, lines):
             cv2.line(line_image, (x1, y1), (x2, y2), (255, 0, 0), 10)
     return line_image
 
-# Read the image
-image = cv2.imread('test_image.jpg')
-# Create copy
-cpy_image = np.copy(image)
-# Canny edge detection
-canny_img = canny(cpy_image)
-# Region of interest  #
-roi = region_of_interest(canny_img)
-# Finding straight lines in image using Hough Transform
-lines = cv2.HoughLinesP(roi, 1, np.pi/360, 100, np.array([]), minLineLength=40, maxLineGap=5)
 
-# Optimization
-averaged_lines = average_slope_intercept(cpy_image, lines)
+image_array = []
+h,w = 0, 0
+cap = cv2.VideoCapture("test2.mp4")
+while(cap.isOpened()):
+    _, frame = cap.read()
+    h,w,_ = frame.shape
+    # Canny edge detection
+    canny_img = canny(frame)
+    # Region of interest  #
+    roi = region_of_interest(canny_img)
+    # Finding straight lines in image using Hough Transform
+    lines = cv2.HoughLinesP(roi, 1, np.pi / 360, 100, np.array([]), minLineLength=40, maxLineGap=5)
 
-line_image = display_lines(cpy_image, averaged_lines)
+    # Optimization
+    averaged_lines = average_slope_intercept(frame, lines)
 
-# overlay lines over original image
-combined_image = cv2.addWeighted(cpy_image,0.8, line_image, 1, 0)
-cv2.imshow('Result', combined_image)
-cv2.waitKey(0)
+    line_image = display_lines(frame, averaged_lines)
+
+    # overlay lines over original image
+    combined_image = cv2.addWeighted(frame, 0.8, line_image, 1, 0)
+    image_array.append(combined_image)
+    cv2.imshow('Result', combined_image)
+    if cv2.waitKey(1) & 0xFF == ord('q'):# masking with 0xFF to ensure cross platlorm performance
+        break
+cap.release()
+
+#out = cv2.VideoWriter('project.mp4', cv2.VideoWriter_fourcc(*'XVID'), 15, (h,w))
+# fourcc = cv2.cv.CV_FOURCC(*'XVID')
+# out = cv2.VideoWriter('output.avi',fourcc, 20.0, (640,480))
+out = cv2.VideoWriter('project.avi',
+                cv2.VideoWriter_fourcc(*'MJPG'),
+                10, (h,w))
+for i in range(len(image_array)):
+    out.write(image_array[i])
+out.release()
+
+cv2.destroyAllWindows()
